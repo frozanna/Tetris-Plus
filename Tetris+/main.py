@@ -22,6 +22,8 @@ class Grid(object):
 
     def draw_grid(self,screen):
         empty_block = pygame.image.load("empty.png")
+        frame = pygame.image.load("frame.png")
+        screen.blit(frame,(first_elem_x - 12, first_elem_y - 12))
         for i in range(ROWS):
             for j in range(COLUMNS):
                 screen.blit(empty_block, (first_elem_x + j * elem_size, first_elem_y + i * elem_size))
