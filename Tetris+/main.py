@@ -1,5 +1,6 @@
 import pygame
 import sys
+import random
 
 ROWS = 20
 COLUMNS = 10
@@ -15,21 +16,60 @@ first_elem_y = (SCREEN_HEIGHT - SURF_HEIGHT) - 40
 
 elem_size = 25
 
+# Tablica bloczkow - nieskonczona
+shapes = [
+            [
+                [(0,0,0,0),
+                 (0,1,1,0),
+                 (0,1,1,0),
+                 (0,0,0,0),],
+            ],
+            [
+                [(0,0,0,0),
+                 (1,1,1,1),
+                 (0,0,0,0),
+                 (0,0,0,0),],
+
+                [(0,1,0,0),
+                 (0,1,0,0),
+                 (0,1,0,0),
+                 (0,1,0,0),],
+             ],
+        ]
+
+shapes_colors = [(0, 255, 0), (255, 0, 0), (0, 255, 255), (255, 255, 0), (255, 165, 0), (0, 0, 255), (128, 0, 128)] #Tu beda potem jakies grafiki
+
+#klasa bloczku
+class Piece(object):
+    def __init__(self, column, row, shape):
+        self.x = column
+        self.y = row
+        self.shape = shape
+        self.color = shapes_colors[shapes.index(shape)]
+        self.rotation = 0
+
+
+# Inicjalizacja siatki
 class Grid(object):
     def __init__(self):
-        grid = [[0 for x in range(COLUMNS)] for x in range(ROWS)]
+        #To sie przy pozniej w grze, zeby sprawdzic, ktore pola sa wypelnione
+        grid = [[0 for _ in range(COLUMNS)] for _ in range(ROWS)]
 
-
+    # Rysowanie siatki
     def draw_grid(self,screen):
-        empty_block = pygame.image.load("empty.png")
+        #Ramka
         frame = pygame.image.load("frame.png")
-        screen.blit(frame,(first_elem_x - 12, first_elem_y - 12))
+        screen.blit(frame, (first_elem_x - 10, first_elem_y - 10))
+
+        #Bloczki
+        empty_block = pygame.image.load("empty.png")
         for i in range(ROWS):
             for j in range(COLUMNS):
                 screen.blit(empty_block, (first_elem_x + j * elem_size, first_elem_y + i * elem_size))
 
 
 
+#Glowna klasa gry
 class Game(object):
     def __init__(self):
         pygame.init()
@@ -41,12 +81,14 @@ class Game(object):
 
     def draw_game(self):
         title_img = pygame.image.load("title.png")
-        self.screen.blit(title_img, (SCREEN_WIDTH / 2 - 75, 20))
+        self.screen.blit(title_img, (SCREEN_WIDTH / 2 - 95, 20))
         self.grid.draw_grid(self.screen)
 
     def start_game(self):
         self.draw_game()
 
+        piece = Piece(5,0,random.choice(shapes))
+        # Tu sie cos bedzie robic, na razie tylko sprawia, ze da sie zamknac okienko
         while True:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -59,6 +101,9 @@ class Game(object):
 
 
 Game().start_game()
+
+
+# A to sie przyda do ustawiania czasu
 
 
 # self.delta += self.clock.tick() / 1000.0
