@@ -5,72 +5,146 @@ import random
 ROWS = 20
 COLUMNS = 10
 
-SCREEN_WIDTH = 500
+SCREEN_WIDTH = 800
 SCREEN_HEIGHT = 620
 
 SURF_WIDTH = 250
 SURF_HEIGHT = 500
 
-first_elem_x = (SCREEN_WIDTH - SURF_WIDTH)/2
+first_elem_x = (SCREEN_WIDTH - SURF_WIDTH) / 2 - 100
 first_elem_y = (SCREEN_HEIGHT - SURF_HEIGHT) - 40
 
 elem_size = 25
 
 # Tablica bloczkow - nieskonczona
 shapes = [
-            [
-                [(0,0,0,0),
-                 (0,1,1,0),
-                 (0,1,1,0),
-                 (0,0,0,0),],
-            ],
-            [
-                [(0,0,0,0),
-                 (1,1,1,1),
-                 (0,0,0,0),
-                 (0,0,0,0),],
+    [
+        [(0, 0, 0, 0),
+         (0, 1, 1, 0),
+         (0, 1, 1, 0),
+         (0, 0, 0, 0), ],
+    ],
+    [
+        [(0, 0, 0, 0),
+         (1, 1, 1, 1),
+         (0, 0, 0, 0),
+         (0, 0, 0, 0), ],
+        [(0, 1, 0, 0),
+         (0, 1, 0, 0),
+         (0, 1, 0, 0),
+         (0, 1, 0, 0), ],
+    ],
+    [
+        [(0, 0, 0, 0),
+         (0, 1, 1, 0),
+         (1, 1, 0, 0),
+         (0, 0, 0, 0), ],
+        [(1, 0, 0, 0),
+         (1, 1, 0, 0),
+         (0, 1, 0, 0),
+         (0, 0, 0, 0), ],
+    ],
+    [
+        [(0, 0, 0, 0),
+         (1, 1, 0, 0),
+         (0, 1, 1, 0),
+         (0, 0, 0, 0), ],
+        [(0, 1, 0, 0),
+         (1, 1, 0, 0),
+         (1, 0, 0, 0),
+         (0, 0, 0, 0), ],
+    ],
+    [
+        [(0, 0, 0, 0),
+         (1, 1, 1, 0),
+         (1, 0, 0, 0),
+         (0, 0, 0, 0), ],
+        [(0, 1, 0, 0),
+         (0, 1, 0, 0),
+         (0, 1, 1, 0),
+         (0, 0, 0, 0), ],
+        [(0, 0, 1, 0),
+         (1, 1, 1, 0),
+         (0, 0, 0, 0),
+         (0, 0, 0, 0), ],
+        [(1, 1, 0, 0),
+         (0, 1, 0, 0),
+         (0, 1, 0, 0),
+         (0, 0, 0, 0), ],
+    ],
+    [
+        [(0, 0, 0, 0),
+         (1, 1, 1, 0),
+         (0, 0, 1, 0),
+         (0, 0, 0, 0), ],
+        [(0, 1, 1, 0),
+         (0, 1, 0, 0),
+         (0, 1, 0, 0),
+         (0, 0, 0, 0), ],
+        [(1, 0, 0, 0),
+         (1, 1, 1, 0),
+         (0, 0, 0, 0),
+         (0, 0, 0, 0), ],
+        [(0, 1, 0, 0),
+         (0, 1, 0, 0),
+         (1, 1, 0, 0),
+         (0, 0, 0, 0), ],
+    ],
+    [
+        [(0, 0, 0, 0),
+         (1, 1, 1, 0),
+         (0, 1, 0, 0),
+         (0, 0, 0, 0), ],
+        [(0, 1, 0, 0),
+         (0, 1, 1, 0),
+         (0, 1, 0, 0),
+         (0, 0, 0, 0), ],
+        [(0, 1, 0, 0),
+         (1, 1, 1, 0),
+         (0, 0, 0, 0),
+         (0, 0, 0, 0), ],
+        [(0, 1, 0, 0),
+         (1, 1, 0, 0),
+         (0, 1, 0, 0),
+         (0, 0, 0, 0), ],
+    ],
+]
 
-                [(0,1,0,0),
-                 (0,1,0,0),
-                 (0,1,0,0),
-                 (0,1,0,0),],
-             ],
-        ]
 
-shapes_colors = [(0, 255, 0), (255, 0, 0), (0, 255, 255), (255, 255, 0), (255, 165, 0), (0, 0, 255), (128, 0, 128)] #Tu beda potem jakies grafiki
+shapes_colors = [pygame.image.load("red.png"), pygame.image.load("blue.png"), pygame.image.load("aqua.png"),
+                 pygame.image.load("yellow.png"), pygame.image.load("magenta.png"), pygame.image.load("green.png"),
+                 pygame.image.load("orange.png")]
 
-#klasa bloczku
-class Piece(object):
+
+class Brick:
     def __init__(self, column, row, shape):
         self.x = column
         self.y = row
         self.shape = shape
         self.color = shapes_colors[shapes.index(shape)]
-        self.rotation = 0
+        self.rotation = random.randint(0, len(shape) - 1)
+
+    def draw_brick(self, game):
+        for i in range(0, 4):
+            for j in range(0, 4):
+                if self.shape[self.rotation][i][j]:
+                    game.screen.blit(self.color,(first_elem_x + (self.x + i) * elem_size, first_elem_y + (self.y + j) * elem_size, elem_size, elem_size))
 
 
-# Inicjalizacja siatki
-class Grid(object):
+class Grid:
     def __init__(self):
-        #To sie przy pozniej w grze, zeby sprawdzic, ktore pola sa wypelnione
-        grid = [[0 for _ in range(COLUMNS)] for _ in range(ROWS)]
+        self.game_grid = [[0 for _ in range(COLUMNS)] for _ in range(ROWS)]
 
-    # Rysowanie siatki
-    def draw_grid(self,screen):
-        #Ramka
+    def draw_grid(self, screen):
         frame = pygame.image.load("frame.png")
         screen.blit(frame, (first_elem_x - 10, first_elem_y - 10))
-
-        #Bloczki
-        empty_block = pygame.image.load("empty.png")
         for i in range(ROWS):
             for j in range(COLUMNS):
-                screen.blit(empty_block, (first_elem_x + j * elem_size, first_elem_y + i * elem_size))
+                if self.game_grid[i][j] != 0:
+                    screen.blit(self.game_grid[i][j], (first_elem_x + i * elem_size, first_elem_y + j * elem_size))
 
 
-
-#Glowna klasa gry
-class Game(object):
+class Game:
     def __init__(self):
         pygame.init()
         self.tps = 100.0
@@ -81,30 +155,59 @@ class Game(object):
 
     def draw_game(self):
         title_img = pygame.image.load("title.png")
-        self.screen.blit(title_img, (SCREEN_WIDTH / 2 - 95, 20))
+        self.screen.blit(title_img, (SCREEN_WIDTH / 2 - 190, 20))
         self.grid.draw_grid(self.screen)
+
+    # def draw_game(self):
+    #     empty_block = pygame.image.load("empty.png")
+    #     for i in range(ROWS):
+    #         for j in range(COLUMNS):
+    #             if self.grid.game_grid[i][j] != 0:
+    #                 pygame.draw.rect(self.screen, self.grid.game_grid[i][j],
+    #                                  (first_elem_x + i * elem_size, first_elem_y + j * elem_size, elem_size, elem_size))
+    #             else:
+    #                 self.screen.blit(empty_block, (first_elem_x + j * elem_size, first_elem_y + i * elem_size))
+    #
+    #     pygame.display.flip()
 
     def start_game(self):
         self.draw_game()
 
-        piece = Piece(5,0,random.choice(shapes))
-        # Tu sie cos bedzie robic, na razie tylko sprawia, ze da sie zamknac okienko
+        brick = Brick(3, 0, random.choice(shapes))
+
         while True:
+            self.draw_game()
+            brick.draw_brick(self)
+
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     sys.exit(0)
                 elif event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
                     sys.exit(0)
+                keys = pygame.key.get_pressed()
+                if keys[pygame.K_UP]:
+                    brick.rotation = (brick.rotation + 1) % len(brick.shape)
+                    brick.draw_brick(self)
 
-            pygame.display.flip()
+            keys = pygame.key.get_pressed()
+            if keys[pygame.K_ESCAPE]:
+                sys.exit(0)
+            if keys[pygame.K_RIGHT]:
+                brick.x += 1
+                brick.draw_brick(self)
+            if keys[pygame.K_LEFT]:
+                brick.x -= 1
+                brick.draw_brick(self)
+            if keys[pygame.K_DOWN]:
+                brick.y += 1
+                brick.draw_brick(self)
 
-
+            pygame.display.update()
 
 Game().start_game()
 
 
 # A to sie przyda do ustawiania czasu
-
 
 # self.delta += self.clock.tick() / 1000.0
 # while self.delta > 1 / self.tps:
