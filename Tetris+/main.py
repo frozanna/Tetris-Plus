@@ -124,12 +124,33 @@ class Brick:
         self.color = shapes_colors[shapes.index(shape)]
         self.rotation = random.randint(0, len(shape) - 1)
 
-    def draw_brick(self, game):
+
+    def draw_brick(self, screen):
         for i in range(0, 4):
             for j in range(0, 4):
                 if self.shape[self.rotation][i][j]:
-                    game.screen.blit(self.color,(first_elem_x + (self.x + i) * elem_size, first_elem_y + (self.y + j) * elem_size, elem_size, elem_size))
+                    screen.blit(self.color, (first_elem_x + (self.x + j) * elem_size, first_elem_y + (self.y + i) * elem_size, elem_size, elem_size))
 
+    def shape_without_whitespaces(self):
+        curr_shape = self .shape[self.rotation]
+        clear_shape = []
+        for i, line in enumerate(curr_shape):
+            row = list(line)
+            for j, element in enumerate(row):
+                if element == 1:
+                    clear_shape.append((self.x + j, self.y + i))
+
+        return clear_shape
+
+    def shape_at_start(self):
+        clear_shape = self.shape_without_whitespaces()
+        must_put_up = True
+        for pos in clear_shape:
+            if pos[1] == 0:
+                must_put_up = False
+                break
+        if must_put_up:
+            self.y -= 1
 
 class Grid:
     def __init__(self):
@@ -143,6 +164,33 @@ class Grid:
                 if self.game_grid[i][j] != 0:
                     screen.blit(self.game_grid[i][j], (first_elem_x + i * elem_size, first_elem_y + j * elem_size))
 
+class Mechanics:
+    def valid_space(shape, grid):
+        ok_possitions = [[(j, i) for j in range(COLUMNS) if grid[i][j] == 0] for i in range(ROWS)]
+        ok_possitions = [j for sub in ok_possitions for j in sub]
+        clear_shape = shape.shape_without_whitespaces()
+
+        for pos in clear_shape:
+            if pos not in ok_possitions:
+                return False
+
+        return True
+
+    def check_rotation(shape,grid):
+        ok_possitions = [[(j, i) for j in range(COLUMNS) if grid[i][j] == 0] for i in range(ROWS)]
+        ok_possitions = [j for sub in ok_possitions for j in sub]
+        clear_shape = shape.shape_without_whitespaces()
+
+        for pos in clear_shape:
+            if pos not in ok_possitions:
+                if pos[0] < 0:
+                    shape.x += 1
+                if pos[0] > 9:
+                    shape.x -= 1
+                if pos[1] < 0:
+                    shape.y += 1
+                if pos[1] > 19:
+                    shape.y -= 1
 
 class Game:
     def __init__(self):
@@ -152,32 +200,23 @@ class Game:
         self.clock = pygame.time.Clock()
         self.delta = 0.0
         self.grid = Grid()
+        self.bricks = Brick(3, 0, random.choice(shapes))
 
     def draw_game(self):
         title_img = pygame.image.load("title.png")
         self.screen.blit(title_img, (SCREEN_WIDTH / 2 - 190, 20))
         self.grid.draw_grid(self.screen)
 
-    # def draw_game(self):
-    #     empty_block = pygame.image.load("empty.png")
-    #     for i in range(ROWS):
-    #         for j in range(COLUMNS):
-    #             if self.grid.game_grid[i][j] != 0:
-    #                 pygame.draw.rect(self.screen, self.grid.game_grid[i][j],
-    #                                  (first_elem_x + i * elem_size, first_elem_y + j * elem_size, elem_size, elem_size))
-    #             else:
-    #                 self.screen.blit(empty_block, (first_elem_x + j * elem_size, first_elem_y + i * elem_size))
-    #
-    #     pygame.display.flip()
-
     def start_game(self):
         self.draw_game()
 
         brick = Brick(3, 0, random.choice(shapes))
+        brick.shape_at_start()
+
 
         while True:
             self.draw_game()
-            brick.draw_brick(self)
+            brick.draw_brick(self.screen)
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -187,20 +226,27 @@ class Game:
                 keys = pygame.key.get_pressed()
                 if keys[pygame.K_UP]:
                     brick.rotation = (brick.rotation + 1) % len(brick.shape)
-                    brick.draw_brick(self)
+                    Mechanics.check_rotation(brick, self.grid.game_grid)
+                    brick.draw_brick(self.screen)
 
             keys = pygame.key.get_pressed()
             if keys[pygame.K_ESCAPE]:
                 sys.exit(0)
             if keys[pygame.K_RIGHT]:
                 brick.x += 1
-                brick.draw_brick(self)
+                if not Mechanics.valid_space(brick,self.grid.game_grid):
+                    brick.x -= 1
+                brick.draw_brick(self.screen)
             if keys[pygame.K_LEFT]:
                 brick.x -= 1
-                brick.draw_brick(self)
+                if not Mechanics.valid_space(brick,self.grid.game_grid):
+                    brick.x += 1
+                brick.draw_brick(self.screen)
             if keys[pygame.K_DOWN]:
                 brick.y += 1
-                brick.draw_brick(self)
+                if not Mechanics.valid_space(brick,self.grid.game_grid):
+                    brick.y -= 1
+                brick.draw_brick(self.screen)
 
             pygame.display.update()
 
