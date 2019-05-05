@@ -3,7 +3,7 @@ import sys
 import random
 from variables import *
 from classes import Grid, Piece
-from mechanics import valid_space, shape_at_start, correct_rotation, clean_rows
+from mechanics import valid_space, shape_at_start, correct_rotation
 
 
 class Game:
@@ -15,31 +15,16 @@ class Game:
         self.grid = Grid()
         self.curr_piece = None
         self.next_piece = None
+        self.change_piece = False
 
         self.running = True
         self.level = 1
-        self.lines = 0
-        self.points = 0
 
     def draw_game(self):
         self.screen.fill([0, 0, 0])
         title_img = pygame.image.load('images/title.png')
         self.screen.blit(title_img, (SCREEN_WIDTH / 2 - 190, 20))
         self.grid.draw_grid(self.screen)
-        font = pygame.font.Font('Pixeled.ttf', 14)
-        levels = font.render(str(self.level), 1, (255, 255, 255))
-        self.screen.blit(levels, (first_elem_x + 265, first_elem_y + 135))
-        lines = font.render(str(self.lines), 1, (255, 255, 255))
-        self.screen.blit(lines, (first_elem_x + 265, first_elem_y + 215))
-        points = font.render(str(self.points), 1, (255, 255, 255))
-        self.screen.blit(points, (first_elem_x + 265, first_elem_y + 295))
-
-        for i in range(0, 4):
-            for j in range(0, 4):
-                if self.next_piece.shape[self.next_piece.rotation][i][j]:
-                    self.screen.blit(self.next_piece.color,
-                                     (first_elem_x + 245 + (self.next_piece.x + j) * elem_size,
-                                      first_elem_y + 380 + (self.next_piece.y + i) * elem_size, elem_size, elem_size))
 
     def run(self):
         fall_time_game = 0
@@ -48,35 +33,17 @@ class Game:
 
         while self.running:
             self.draw_game()
-            if self.running:
-                self.curr_piece.draw_piece(self.screen)
+            self.curr_piece.draw_piece(self.screen)
 
             fall_speed_game = 0.75 / (self.level / 1.5)
             fall_time_game += self.clock.get_rawtime()
             fall_time_usr += self.clock.get_rawtime()
             self.clock.tick()
 
-            if fall_time_game / 1000 >= fall_speed_game:
+            if not self.change_piece and fall_time_game / 1000 >= fall_speed_game:
                 fall_time_game = 0
                 self.curr_piece.y += 1
-
-            if not valid_space(self.curr_piece, self.grid.game_grid):
-                self.curr_piece.y -= 1
-                if self.curr_piece.y < 0:
-                    self.running = False
-                    continue
-
-                piece_pos = [[(j + self.curr_piece.x, i + self.curr_piece.y) for j in range(0, 4)
-                              if self.curr_piece.shape[self.curr_piece.rotation][i][j] != 0] for i in range(0, 4)]
-                piece_pos = [j for el in piece_pos for j in el]
-                for p in piece_pos:
-                    self.grid.game_grid[p[1]][p[0]] = self.curr_piece.color
-
-                if self.running:
-                    self.curr_piece = self.next_piece
-                    shape_at_start(self.curr_piece)
-                    self.next_piece = Piece(3, 0, random.choice(shapes))
-                    self.curr_piece.draw_piece(self.screen)
+                self.curr_piece.draw_piece(self.screen)
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -98,35 +65,33 @@ class Game:
                         self.curr_piece.x += 1
                     self.curr_piece.draw_piece(self.screen)
 
-            if fall_time_usr / 1000 >= 0.02:
+            if not self.change_piece and fall_time_usr / 1000 >= 0.02:
                 fall_time_usr = 0
                 keys = pygame.key.get_pressed()
                 if keys[pygame.K_ESCAPE]:
                     sys.exit(0)
                 if keys[pygame.K_DOWN]:
                     self.curr_piece.y += 1
-                    if not valid_space(self.curr_piece, self.grid.game_grid):
-                        self.curr_piece.y -= 1
                     self.curr_piece.draw_piece(self.screen)
 
-            clean_rows(self)
-            self.level = self.lines // 10 + 1
+            # Klocek dotyka ziemi #TODO
+            if not valid_space(self.curr_piece, self.grid.game_grid):
+                self.curr_piece.y -= 1
+                piece_pos = [[(j + self.curr_piece.x, i + self.curr_piece.y) for j in range(0,4)
+                              if self.curr_piece.shape[self.curr_piece.rotation][i][j] != 0] for i in range(0,4)]
+                piece_pos = [j for el in piece_pos for j in el]
+                self.change_piece = True
+                for p in piece_pos:
+                    self.grid.game_grid[p[1]][p[0]] = self.curr_piece.color
+
             pygame.display.update()
 
-        game_over_img = pygame.image.load('images/game_over.png')
-        self.screen.blit(game_over_img, (first_elem_x + 25, first_elem_y + 150))
-        pygame.time.delay(200)
-        pygame.display.update()
-        pygame.time.delay(5000)
-
     def start_game(self):
-        self.curr_piece = Piece(3, 0, random.choice(shapes))
-        self.next_piece = Piece(3, 0, random.choice(shapes))
-
         self.draw_game()
         press_start_img = pygame.image.load('images/press_start.png')
         self.screen.blit(press_start_img, (first_elem_x + COLUMNS * elem_size + 15, first_elem_y + 2 * elem_size))
 
+        self.curr_piece = Piece(3, 0, random.choice(shapes))
         shape_at_start(self.curr_piece)
 
         self.curr_piece.draw_piece(self.screen)
@@ -140,4 +105,3 @@ class Game:
                     sys.exit(0)
                 elif event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
                     self.run()
-

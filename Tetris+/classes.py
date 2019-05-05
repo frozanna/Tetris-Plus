@@ -19,14 +19,14 @@ class Piece:
 
     def shape_without_whitespaces(self):
         curr_shape = self .shape[self.rotation]
-        clear_shape = []
+        clean_shape = []
         for i, line in enumerate(curr_shape):
             row = list(line)
             for j, element in enumerate(row):
                 if element == 1:
-                    clear_shape.append((self.x + j, self.y + i))
+                    clean_shape.append((self.x + j, self.y + i))
 
-        return clear_shape
+        return clean_shape
 
 
 class Grid:
@@ -39,4 +39,4 @@ class Grid:
         for i in range(ROWS):
             for j in range(COLUMNS):
                 if self.game_grid[i][j] != 0:
-                    screen.blit(self.game_grid[i][j], (first_elem_x + i * elem_size, first_elem_y + j * elem_size))
+                    screen.blit(self.game_grid[i][j], (first_elem_x + j * elem_size, first_elem_y + i * elem_size))
