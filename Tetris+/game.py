@@ -75,7 +75,6 @@ class Game:
                     self.power.draw_power(self.screen)
                     if check_if_power(self.curr_piece, self.power):
                         run_power(self) == 1
-                        pygame.display.update()
                         self.power = None
                         continue
 

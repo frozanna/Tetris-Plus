@@ -62,6 +62,6 @@ def find_place_for_power(grid, piece):
     empty_positions = [j for sub in empty_positions for j in sub]
     position = random.choice(empty_positions)
 
-    if piece.x <= position[0] <= piece.y or piece.y <= position[1] <= piece.y + 3:
-        find_place_for_power(grid, piece)
+    while piece.x <= position[0] <= piece.y or piece.y <= position[1] <= piece.y + 3:
+        position = random.choice(empty_positions)
     return position
