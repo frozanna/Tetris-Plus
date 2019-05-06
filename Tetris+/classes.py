@@ -1,5 +1,6 @@
 from variables import *
 import random
+from numpy.random import choice
 
 
 class Piece:
@@ -40,3 +41,27 @@ class Grid:
             for j in range(COLUMNS):
                 if self.game_grid[i][j] != 0:
                     screen.blit(self.game_grid[i][j], (first_elem_x + j * elem_size, first_elem_y + i * elem_size))
+
+
+class Power:
+    def __init__(self, grid, piece):
+        self.type = choice(powers, p=[0.25, 0.3, 0.05, 0.25, 0.15])
+        #self.type = clean_all
+
+        position = find_place_for_power(grid, piece)
+        self.x = position[0]
+        self.y = position[1]
+
+    def draw_power(self, screen):
+        screen.blit(self.type, (first_elem_x + self.x * elem_size,
+                                first_elem_y + self.y * elem_size, elem_size, elem_size))
+
+
+def find_place_for_power(grid, piece):
+    empty_positions = [[(j, i) for j in range(COLUMNS) if grid[i][j] == 0 and i > 2] for i in range(ROWS)]
+    empty_positions = [j for sub in empty_positions for j in sub]
+    position = random.choice(empty_positions)
+
+    if piece.x <= position[0] <= piece.y or piece.y <= position[1] <= piece.y + 3:
+        find_place_for_power(grid, piece)
+    return position

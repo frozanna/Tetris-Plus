@@ -2,8 +2,8 @@ import pygame
 import sys
 import random
 from variables import *
-from classes import Grid, Piece
-from mechanics import valid_space, shape_at_start, correct_rotation, clean_rows
+from classes import Grid, Piece, Power
+from mechanics import valid_space, shape_at_start, correct_rotation, clean_rows, run_power, check_if_power
 
 
 class Game:
@@ -15,6 +15,7 @@ class Game:
         self.grid = Grid()
         self.curr_piece = None
         self.next_piece = None
+        self.power = None
 
         self.running = True
         self.level = 1
@@ -32,7 +33,7 @@ class Game:
         lines = font.render(str(self.lines), 1, (255, 255, 255))
         self.screen.blit(lines, (first_elem_x + 265, first_elem_y + 215))
         points = font.render(str(self.points), 1, (255, 255, 255))
-        self.screen.blit(points, (first_elem_x + 265, first_elem_y + 295))
+        self.screen.blit(points, (first_elem_x + 265, first_elem_y + 296))
 
         for i in range(0, 4):
             for j in range(0, 4):
@@ -42,6 +43,8 @@ class Game:
                                       first_elem_y + 380 + (self.next_piece.y + i) * elem_size, elem_size, elem_size))
 
     def run(self):
+        to_power_time = 0
+        power_last_time = 0
         fall_time_game = 0
         fall_speed_game = 0
         fall_time_usr = 0
@@ -51,10 +54,30 @@ class Game:
             if self.running:
                 self.curr_piece.draw_piece(self.screen)
 
-            fall_speed_game = 0.75 / (self.level / 1.5)
+            fall_speed_game = 0.75 / (self.level / 2.5)
             fall_time_game += self.clock.get_rawtime()
             fall_time_usr += self.clock.get_rawtime()
+            if self.power is None:
+                to_power_time += self.clock.get_rawtime()
+            else:
+                power_last_time += self.clock.get_rawtime()
             self.clock.tick()
+
+            if self.power is None:
+                if to_power_time >= 17500:
+                    to_power_time = 0
+                    self.power = Power(self.grid.game_grid, self.curr_piece)
+            else:
+                if power_last_time >= 10000:
+                    self.power = None
+                    power_last_time = 0
+                else:
+                    self.power.draw_power(self.screen)
+                    if check_if_power(self.curr_piece, self.power):
+                        run_power(self) == 1
+                        pygame.display.update()
+                        self.power = None
+                        continue
 
             if fall_time_game / 1000 >= fall_speed_game:
                 fall_time_game = 0
