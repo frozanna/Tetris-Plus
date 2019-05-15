@@ -1,9 +1,13 @@
 import pygame
 import sys
 import random
-from variables import *
+from variables import ROWS, COLUMNS, SCREEN_WIDTH, SCREEN_HEIGHT, SURF_WIDTH, SURF_HEIGHT, first_elem_x,\
+    first_elem_y, elem_size, shapes, shapes_colors, change_shape, next_shape,\
+    clean_all, minus_line, plus_line, powers
 from classes import Grid, Piece, Power
-from mechanics import valid_space, shape_at_start, correct_rotation, clean_rows, run_power, check_if_power
+from mechanics import valid_space, shape_at_start, correct_rotation, clean_rows, run_power,\
+    check_if_power
+
 
 
 class Game:
@@ -162,4 +166,3 @@ class Game:
                     sys.exit(0)
                 elif event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
                     self.run()
-

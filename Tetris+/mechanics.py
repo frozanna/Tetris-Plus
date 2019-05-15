@@ -1,4 +1,6 @@
-from variables import *
+from variables import ROWS, COLUMNS, SCREEN_WIDTH, SCREEN_HEIGHT, SURF_WIDTH, SURF_HEIGHT, first_elem_x
+from variables import first_elem_y, elem_size, shapes, shapes_colors, change_shape, next_shape
+from variables import clean_all, minus_line, plus_line, powers
 from classes import Piece, Grid, Power
 import random
 

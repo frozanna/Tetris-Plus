@@ -1,5 +1,4 @@
 import pygame
-from variables import *
 
 ROWS = 20
 COLUMNS = 10
