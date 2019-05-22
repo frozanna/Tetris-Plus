@@ -1,13 +1,13 @@
 import pygame
 import sys
 import random
-from variables import ROWS, COLUMNS, SCREEN_WIDTH, SCREEN_HEIGHT, SURF_WIDTH, SURF_HEIGHT, first_elem_x,\
-    first_elem_y, elem_size, shapes, shapes_colors, change_shape, next_shape,\
-    clean_all, minus_line, plus_line, powers
+from variables import COLUMNS, SCREEN_WIDTH, SCREEN_HEIGHT,  first_elem_x,\
+    first_elem_y, elem_size, shapes
+# ROWS, SURF_WIDTH, SURF_HEIGHT, shapes_colors, change_shape, next_shape,\
+# clean_all, minus_line, plus_line, powers
 from classes import Grid, Piece, Power
-from mechanics import valid_space, shape_at_start, correct_rotation, clean_rows, run_power,\
-    check_if_power
-
+from mechanics import valid_space, shape_at_start, correct_rotation,\
+    clean_rows, run_power, check_if_power
 
 
 class Game:
@@ -43,8 +43,11 @@ class Game:
             for j in range(0, 4):
                 if self.next_piece.shape[self.next_piece.rotation][i][j]:
                     self.screen.blit(self.next_piece.color,
-                                     (first_elem_x + 245 + (self.next_piece.x + j) * elem_size,
-                                      first_elem_y + 380 + (self.next_piece.y + i) * elem_size, elem_size, elem_size))
+                                     (first_elem_x + 245 +
+                                      (self.next_piece.x + j) * elem_size,
+                                      first_elem_y + 380 +
+                                      (self.next_piece.y + i) * elem_size,
+                                      elem_size, elem_size))
 
     def run(self):
         to_power_time = 0
@@ -92,8 +95,11 @@ class Game:
                     self.running = False
                     continue
 
-                piece_pos = [[(j + self.curr_piece.x, i + self.curr_piece.y) for j in range(0, 4)
-                              if self.curr_piece.shape[self.curr_piece.rotation][i][j] != 0] for i in range(0, 4)]
+                piece_pos = [[(j + self.curr_piece.x, i + self.curr_piece.y)
+                              for j in range(0, 4)
+                              if self.curr_piece.shape
+                              [self.curr_piece.rotation][i][j] != 0]
+                             for i in range(0, 4)]
                 piece_pos = [j for el in piece_pos for j in el]
                 for p in piece_pos:
                     self.grid.game_grid[p[1]][p[0]] = self.curr_piece.color
@@ -107,18 +113,22 @@ class Game:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     sys.exit(0)
-                elif event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
+                elif event.type == pygame.KEYDOWN and \
+                        event.key == pygame.K_ESCAPE:
                     sys.exit(0)
                 elif event.type == pygame.KEYDOWN and event.key == pygame.K_UP:
-                    self.curr_piece.rotation = (self.curr_piece.rotation + 1) % len(self.curr_piece.shape)
+                    self.curr_piece.rotation = (self.curr_piece.rotation + 1)\
+                                               % len(self.curr_piece.shape)
                     correct_rotation(self.curr_piece, self.grid.game_grid)
                     self.curr_piece.draw_piece(self.screen)
-                elif event.type == pygame.KEYDOWN and event.key == pygame.K_RIGHT:
+                elif event.type == pygame.KEYDOWN and \
+                        event.key == pygame.K_RIGHT:
                     self.curr_piece.x += 1
                     if not valid_space(self.curr_piece, self.grid.game_grid):
                         self.curr_piece.x -= 1
                     self.curr_piece.draw_piece(self.screen)
-                elif event.type == pygame.KEYDOWN and event.key == pygame.K_LEFT:
+                elif event.type == pygame.KEYDOWN and \
+                        event.key == pygame.K_LEFT:
                     self.curr_piece.x -= 1
                     if not valid_space(self.curr_piece, self.grid.game_grid):
                         self.curr_piece.x += 1
@@ -140,7 +150,8 @@ class Game:
             pygame.display.update()
 
         game_over_img = pygame.image.load('images/game_over.png')
-        self.screen.blit(game_over_img, (first_elem_x + 25, first_elem_y + 150))
+        self.screen.blit(game_over_img,
+                         (first_elem_x + 25, first_elem_y + 150))
         pygame.time.delay(200)
         pygame.display.update()
         pygame.time.delay(5000)
@@ -151,7 +162,9 @@ class Game:
 
         self.draw_game()
         press_start_img = pygame.image.load('images/press_start.png')
-        self.screen.blit(press_start_img, (first_elem_x + COLUMNS * elem_size + 15, first_elem_y + 2 * elem_size))
+        self.screen.blit(press_start_img,
+                         (first_elem_x + COLUMNS * elem_size + 15,
+                          first_elem_y + 2 * elem_size))
 
         shape_at_start(self.curr_piece)
 
@@ -162,7 +175,9 @@ class Game:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     sys.exit(0)
-                elif event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
+                elif event.type == pygame.KEYDOWN and \
+                        event.key == pygame.K_ESCAPE:
                     sys.exit(0)
-                elif event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
+                elif event.type == pygame.KEYDOWN and \
+                        event.key == pygame.K_SPACE:
                     self.run()

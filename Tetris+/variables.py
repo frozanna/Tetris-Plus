@@ -108,9 +108,12 @@ shapes = [
     ],
 ]
 
-shapes_colors = [pygame.image.load('images/aqua.png'), pygame.image.load('images/red.png'),
-                 pygame.image.load('images/blue.png'), pygame.image.load('images/green.png'),
-                 pygame.image.load('images/yellow.png'), pygame.image.load('images/magenta.png'),
+shapes_colors = [pygame.image.load('images/aqua.png'),
+                 pygame.image.load('images/red.png'),
+                 pygame.image.load('images/blue.png'),
+                 pygame.image.load('images/green.png'),
+                 pygame.image.load('images/yellow.png'),
+                 pygame.image.load('images/magenta.png'),
                  pygame.image.load('images/orange.png')]
 
 change_shape = pygame.image.load('images/p_change_shape.png')

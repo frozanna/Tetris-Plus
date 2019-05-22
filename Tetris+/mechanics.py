@@ -1,7 +1,10 @@
-from variables import ROWS, COLUMNS, SCREEN_WIDTH, SCREEN_HEIGHT, SURF_WIDTH, SURF_HEIGHT, first_elem_x
-from variables import first_elem_y, elem_size, shapes, shapes_colors, change_shape, next_shape
-from variables import clean_all, minus_line, plus_line, powers
-from classes import Piece, Grid, Power
+from variables import ROWS, COLUMNS
+#  SCREEN_WIDTH, SCREEN_HEIGHT, SURF_WIDTH, SURF_HEIGHT, first_elem_x
+from variables import shapes, shapes_colors, change_shape, next_shape
+# first_elem_y, elem_size, powers
+from variables import clean_all, minus_line, plus_line
+from classes import Piece
+# Grid, Power
 import random
 
 
@@ -17,7 +20,8 @@ def shape_at_start(shape):
 
 
 def valid_space(shape, grid):
-    grid_positions = [[(j, i) for j in range(COLUMNS) if grid[i][j] == 0] for i in range(ROWS)]
+    grid_positions = [[(j, i) for j in range(COLUMNS) if grid[i][j] == 0]
+                      for i in range(ROWS)]
     grid_positions = [j for sub in grid_positions for j in sub]
     clear_shape = shape.shape_without_whitespaces()
 
@@ -29,7 +33,8 @@ def valid_space(shape, grid):
 
 
 def correct_rotation(shape, grid):
-    ok_positions = [[(j, i) for j in range(COLUMNS) if grid[i][j] == 0] for i in range(ROWS)]
+    ok_positions = [[(j, i) for j in range(COLUMNS) if grid[i][j] == 0]
+                    for i in range(ROWS)]
     ok_positions = [j for sub in ok_positions for j in sub]
     clear_shape = shape.shape_without_whitespaces()
 
@@ -85,7 +90,8 @@ def run_power(game):
         game.next_piece = Piece(3, 0, random.choice(shapes))
         game.curr_piece.draw_piece(game.screen)
     elif game.power.type == change_shape:
-        game.curr_piece = Piece(game.curr_piece.x, game.curr_piece.y, random.choice(shapes))
+        game.curr_piece = \
+            Piece(game.curr_piece.x, game.curr_piece.y, random.choice(shapes))
         game.curr_piece.draw_piece(game.screen)
     elif game.power.type == minus_line:
         for r in range(19, -1, -1):

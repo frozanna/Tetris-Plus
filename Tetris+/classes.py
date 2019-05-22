@@ -1,7 +1,8 @@
 import pygame
-from variables import ROWS, COLUMNS, SCREEN_WIDTH, SCREEN_HEIGHT, SURF_WIDTH, SURF_HEIGHT, first_elem_x,\
-    first_elem_y, elem_size, shapes, shapes_colors, change_shape, next_shape,\
-    clean_all, minus_line, plus_line, powers
+from variables import ROWS, COLUMNS, first_elem_x,\
+    first_elem_y, elem_size, shapes, shapes_colors, powers
+# SCREEN_WIDTH, SCREEN_HEIGHT, SURF_WIDTH, SURF_HEIGHT, change_shape,
+# next_shape, clean_all, minus_line, plus_line,
 import random
 from numpy.random import choice
 
@@ -18,8 +19,10 @@ class Piece:
         for i in range(0, 4):
             for j in range(0, 4):
                 if self.shape[self.rotation][i][j]:
-                    screen.blit(self.color, (first_elem_x + (self.x + j) * elem_size,
-                                             first_elem_y + (self.y + i) * elem_size, elem_size, elem_size))
+                    screen.blit(self.color,
+                                (first_elem_x + (self.x + j) * elem_size,
+                                 first_elem_y + (self.y + i) * elem_size,
+                                 elem_size, elem_size))
 
     def shape_without_whitespaces(self):
         curr_shape = self .shape[self.rotation]
@@ -43,7 +46,9 @@ class Grid:
         for i in range(ROWS):
             for j in range(COLUMNS):
                 if self.game_grid[i][j] != 0:
-                    screen.blit(self.game_grid[i][j], (first_elem_x + j * elem_size, first_elem_y + i * elem_size))
+                    screen.blit(self.game_grid[i][j],
+                                (first_elem_x + j * elem_size,
+                                 first_elem_y + i * elem_size))
 
 
 class Power:
@@ -56,15 +61,19 @@ class Power:
         self.y = position[1]
 
     def draw_power(self, screen):
-        screen.blit(self.type, (first_elem_x + self.x * elem_size,
-                                first_elem_y + self.y * elem_size, elem_size, elem_size))
+        screen.blit(self.type,
+                    (first_elem_x + self.x * elem_size,
+                     first_elem_y + self.y * elem_size, elem_size, elem_size))
 
 
 def find_place_for_power(grid, piece):
-    empty_positions = [[(j, i) for j in range(COLUMNS) if grid[i][j] == 0 and i > 2] for i in range(ROWS)]
+    empty_positions = \
+        [[(j, i) for j in range(COLUMNS) if grid[i][j] == 0 and i > 2]
+         for i in range(ROWS)]
     empty_positions = [j for sub in empty_positions for j in sub]
     position = random.choice(empty_positions)
 
-    while piece.x <= position[0] <= piece.y or piece.y <= position[1] <= piece.y + 3:
+    while piece.x <= position[0] <= piece.y or \
+            piece.y <= position[1] <= piece.y + 3:
         position = random.choice(empty_positions)
     return position
