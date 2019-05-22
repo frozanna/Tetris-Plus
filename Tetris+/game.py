@@ -1,4 +1,5 @@
 import pygame
+from pygame.locals import FULLSCREEN
 import sys
 import random
 from variables import COLUMNS, SCREEN_WIDTH, SCREEN_HEIGHT,  first_elem_x,\
@@ -7,14 +8,16 @@ from variables import COLUMNS, SCREEN_WIDTH, SCREEN_HEIGHT,  first_elem_x,\
 # clean_all, minus_line, plus_line, powers
 from classes import Grid, Piece, Power
 from mechanics import valid_space, shape_at_start, correct_rotation,\
-    clean_rows, run_power, check_if_power
+    clean_rows, run_power, check_if_power, gamer_lost, draw_pause
 
 
 class Game:
     def __init__(self):
         pygame.init()
-        self.screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
+        self.screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT), FULLSCREEN)
         self.clock = pygame.time.Clock()
+
+        self.paused = 0
 
         self.grid = Grid()
         self.curr_piece = None
@@ -29,7 +32,7 @@ class Game:
     def draw_game(self):
         self.screen.fill([0, 0, 0])
         title_img = pygame.image.load('images/title.png')
-        self.screen.blit(title_img, (SCREEN_WIDTH / 2 - 190, 20))
+        self.screen.blit(title_img, (SCREEN_WIDTH / 2 - 190, first_elem_y - 60))
         self.grid.draw_grid(self.screen)
         font = pygame.font.Font('Pixeled.ttf', 14)
         levels = font.render(str(self.level), 1, (255, 255, 255))
@@ -45,7 +48,7 @@ class Game:
                     self.screen.blit(self.next_piece.color,
                                      (first_elem_x + 245 +
                                       (self.next_piece.x + j) * elem_size,
-                                      first_elem_y + 380 +
+                                      first_elem_y + 381 +
                                       (self.next_piece.y + i) * elem_size,
                                       elem_size, elem_size))
 
@@ -57,6 +60,19 @@ class Game:
         fall_time_usr = 0
 
         while self.running:
+            if self.paused:
+                draw_pause(self.screen)
+                for event in pygame.event.get():
+                    if event.type == pygame.QUIT:
+                        sys.exit(0)
+                    elif event.type == pygame.KEYDOWN and \
+                            event.key == pygame.K_ESCAPE:
+                        sys.exit(0)
+                    elif event.type == pygame.KEYDOWN and \
+                            event.key == pygame.K_p:
+                        self.paused = 0
+                continue
+
             self.draw_game()
             if self.running:
                 self.curr_piece.draw_piece(self.screen)
@@ -81,7 +97,7 @@ class Game:
                 else:
                     self.power.draw_power(self.screen)
                     if check_if_power(self.curr_piece, self.power):
-                        run_power(self) == 1
+                        run_power(self)
                         self.power = None
                         continue
 
@@ -89,26 +105,8 @@ class Game:
                 fall_time_game = 0
                 self.curr_piece.y += 1
 
-            if not valid_space(self.curr_piece, self.grid.game_grid):
-                self.curr_piece.y -= 1
-                if self.curr_piece.y < 0:
-                    self.running = False
-                    continue
-
-                piece_pos = [[(j + self.curr_piece.x, i + self.curr_piece.y)
-                              for j in range(0, 4)
-                              if self.curr_piece.shape
-                              [self.curr_piece.rotation][i][j] != 0]
-                             for i in range(0, 4)]
-                piece_pos = [j for el in piece_pos for j in el]
-                for p in piece_pos:
-                    self.grid.game_grid[p[1]][p[0]] = self.curr_piece.color
-
-                if self.running:
-                    self.curr_piece = self.next_piece
-                    shape_at_start(self.curr_piece)
-                    self.next_piece = Piece(3, 0, random.choice(shapes))
-                    self.curr_piece.draw_piece(self.screen)
+            if gamer_lost(self):
+                continue
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -116,6 +114,9 @@ class Game:
                 elif event.type == pygame.KEYDOWN and \
                         event.key == pygame.K_ESCAPE:
                     sys.exit(0)
+                elif event.type == pygame.KEYDOWN and \
+                        event.key == pygame.K_p:
+                    self.paused = 1
                 elif event.type == pygame.KEYDOWN and event.key == pygame.K_UP:
                     self.curr_piece.rotation = (self.curr_piece.rotation + 1)\
                                                % len(self.curr_piece.shape)

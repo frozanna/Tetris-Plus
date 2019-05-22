@@ -10,7 +10,7 @@ SURF_WIDTH = 250
 SURF_HEIGHT = 500
 
 first_elem_x = (SCREEN_WIDTH - SURF_WIDTH) / 2 - 100
-first_elem_y = (SCREEN_HEIGHT - SURF_HEIGHT) - 40
+first_elem_y = 80
 
 elem_size = 25
 

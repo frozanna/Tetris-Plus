@@ -1,7 +1,9 @@
+import pygame
 from variables import ROWS, COLUMNS
 #  SCREEN_WIDTH, SCREEN_HEIGHT, SURF_WIDTH, SURF_HEIGHT, first_elem_x
-from variables import shapes, shapes_colors, change_shape, next_shape
-# first_elem_y, elem_size, powers
+from variables import shapes, shapes_colors, change_shape, next_shape, \
+    first_elem_x, first_elem_y
+# elem_size, powers
 from variables import clean_all, minus_line, plus_line
 from classes import Piece
 # Grid, Power
@@ -51,7 +53,7 @@ def correct_rotation(shape, grid):
 
 
 def clean_rows(game):
-    lines_clened = 0
+    lines_cleaned = 0
     for i in range(ROWS):
         full_row = True
         for j in range(COLUMNS):
@@ -59,7 +61,7 @@ def clean_rows(game):
                 full_row = False
 
         if full_row:
-            lines_clened += 1
+            lines_cleaned += 1
             game.lines += 1
             for r in range(i, -1, -1):
                 for c in range(COLUMNS):
@@ -68,13 +70,13 @@ def clean_rows(game):
             for c in range(COLUMNS):
                 game.grid.game_grid[0][c] = 0
 
-    if lines_clened == 1:
+    if lines_cleaned == 1:
         game.points += 40 * game.level
-    elif lines_clened == 2:
+    elif lines_cleaned == 2:
         game.points += 100 * game.level
-    elif lines_clened == 3:
+    elif lines_cleaned == 3:
         game.points += 300 * game.level
-    elif lines_clened > 3:
+    elif lines_cleaned > 3:
         game.points += 1200 * game.level
 
 
@@ -128,9 +130,33 @@ def check_if_power(piece, power):
     return False
 
 
-# def is_lost(shape):
-#     clear_shape = shape.shape_without_whitespaces()
-#     for pos in clear_shape:
-#         if pos[1] < 0:
-#             return True
-#     return False
+def gamer_lost(game):
+    if not valid_space(game.curr_piece, game.grid.game_grid):
+        game.curr_piece.y -= 1
+        if game.curr_piece.y < 0:
+            game.running = False
+            return True
+
+        piece_pos = [[(j + game.curr_piece.x, i + game.curr_piece.y)
+                      for j in range(0, 4)
+                      if game.curr_piece.shape
+                      [game.curr_piece.rotation][i][j] != 0]
+                     for i in range(0, 4)]
+        piece_pos = [j for el in piece_pos for j in el]
+        for p in piece_pos:
+            game.grid.game_grid[p[1]][p[0]] = game.curr_piece.color
+
+        if game.running:
+            game.curr_piece = game.next_piece
+            shape_at_start(game.curr_piece)
+            game.next_piece = Piece(3, 0, random.choice(shapes))
+            game.curr_piece.draw_piece(game.screen)
+        return False
+
+
+def draw_pause(screen):
+    rect1 = pygame.Rect(first_elem_x + 80, first_elem_y + 180, 30, 100)
+    pygame.draw.rect(screen, (255, 255, 255), rect1)
+    rect2 = pygame.Rect(first_elem_x + 140, first_elem_y + 180, 30, 100)
+    pygame.draw.rect(screen, (255, 255, 255), rect2)
+    pygame.display.update()
