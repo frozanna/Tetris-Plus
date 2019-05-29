@@ -22,6 +22,7 @@ class Game:
         self.curr_piece = None
         self.next_piece = None
         self.power = None
+        self.changed_controls = False
 
         self.running = True
         self.paused = False
@@ -31,7 +32,7 @@ class Game:
 
     def draw_game(self):
         self.screen.fill([0, 0, 0])
-        title_img = pygame.image.load('images/title.jpg')
+        title_img = pygame.image.load('images/title.png')
         self.screen.blit(title_img, (SCREEN_WIDTH / 2 - 190,
                                      first_elem_y - 60))
         self.grid.draw_grid(self.screen)
@@ -53,12 +54,39 @@ class Game:
                                       (self.next_piece.y + i) * elem_size,
                                       elem_size, elem_size))
 
+    def evaluate_keys(self):
+        for event in pygame.event.get():
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_p:
+                self.paused = True
+            elif event.type == pygame.KEYDOWN and event.key == pygame.K_UP:
+                self.curr_piece.rotation = (self.curr_piece.rotation + 1) \
+                                           % len(self.curr_piece.shape)
+                correct_rotation(self.curr_piece, self.grid.game_grid)
+                self.curr_piece.draw_piece(self.screen)
+            elif (event.type == pygame.KEYDOWN and
+                  event.key == pygame.K_RIGHT and not self.changed_controls) or \
+                    (event.type == pygame.KEYDOWN and
+                     event.key == pygame.K_LEFT and self.changed_controls):
+                self.curr_piece.x += 1
+                if not valid_space(self.curr_piece, self.grid.game_grid):
+                    self.curr_piece.x -= 1
+                self.curr_piece.draw_piece(self.screen)
+            elif (event.type == pygame.KEYDOWN and
+                  event.key == pygame.K_LEFT and not self.changed_controls) or \
+                    (event.type == pygame.KEYDOWN and
+                     event.key == pygame.K_RIGHT and self.changed_controls):
+                self.curr_piece.x -= 1
+                if not valid_space(self.curr_piece, self.grid.game_grid):
+                    self.curr_piece.x += 1
+                self.curr_piece.draw_piece(self.screen)
+
     def run(self):
         to_power_time = 0
         power_last_time = 0
         fall_time_game = 0
         fall_speed_game = 0
         fall_time_usr = 0
+        changed_controls_time = 0
 
         pygame.mixer.music.load('sounds/Tetris.mp3')
         pygame.mixer.music.play(-1)
@@ -70,11 +98,9 @@ class Game:
                 for event in pygame.event.get():
                     if event.type == pygame.QUIT:
                         sys.exit(0)
-                    elif event.type == pygame.KEYDOWN and \
-                            event.key == pygame.K_ESCAPE:
+                    elif event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
                         sys.exit(0)
-                    elif event.type == pygame.KEYDOWN and \
-                            event.key == pygame.K_p:
+                    elif event.type == pygame.KEYDOWN and event.key == pygame.K_p:
                         self.paused = False
                 continue
 
@@ -84,6 +110,14 @@ class Game:
             fall_speed_game = 0.75 / (self.level / 2.5)
             fall_time_game += self.clock.get_rawtime()
             fall_time_usr += self.clock.get_rawtime()
+
+            if self.changed_controls:
+                if changed_controls_time >= 25000:
+                    changed_controls_time = 0
+                    self.changed_controls = False
+                else:
+                    changed_controls_time += self.clock.get_rawtime()
+
             if self.power is None:
                 to_power_time += self.clock.get_rawtime()
                 if to_power_time >= 17500:
@@ -109,27 +143,7 @@ class Game:
             if gamer_lost(self):
                 continue
 
-            for event in pygame.event.get():
-                if event.type == pygame.KEYDOWN and \
-                        event.key == pygame.K_p:
-                    self.paused = True
-                elif event.type == pygame.KEYDOWN and event.key == pygame.K_UP:
-                    self.curr_piece.rotation = (self.curr_piece.rotation + 1)\
-                                               % len(self.curr_piece.shape)
-                    correct_rotation(self.curr_piece, self.grid.game_grid)
-                    self.curr_piece.draw_piece(self.screen)
-                elif event.type == pygame.KEYDOWN and \
-                        event.key == pygame.K_RIGHT:
-                    self.curr_piece.x += 1
-                    if not valid_space(self.curr_piece, self.grid.game_grid):
-                        self.curr_piece.x -= 1
-                    self.curr_piece.draw_piece(self.screen)
-                elif event.type == pygame.KEYDOWN and \
-                        event.key == pygame.K_LEFT:
-                    self.curr_piece.x -= 1
-                    if not valid_space(self.curr_piece, self.grid.game_grid):
-                        self.curr_piece.x += 1
-                    self.curr_piece.draw_piece(self.screen)
+            self.evaluate_keys()
 
             if fall_time_usr / 1000 >= 0.02:
                 fall_time_usr = 0
@@ -147,7 +161,9 @@ class Game:
             pygame.display.update()
 
         pygame.mixer.music.stop()
-        game_over_img = pygame.image.load('images/game_over.jpg')
+        power_sound = pygame.mixer.Sound('sounds/game_over.wav')
+        power_sound.play()
+        game_over_img = pygame.image.load('images/game_over.png')
         self.screen.blit(game_over_img,
                          (first_elem_x + 25, first_elem_y + 150))
         pygame.time.delay(200)
@@ -159,7 +175,7 @@ class Game:
         self.next_piece = Piece(3, 0, random.choice(shapes))
 
         self.draw_game()
-        press_start_img = pygame.image.load('images/press_start.jpg')
+        press_start_img = pygame.image.load('images/press_start.png')
         self.screen.blit(press_start_img,
                          (first_elem_x + COLUMNS * elem_size + 15,
                           first_elem_y + 2 * elem_size))

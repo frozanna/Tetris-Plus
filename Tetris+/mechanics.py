@@ -1,12 +1,9 @@
 import pygame
 from variables import ROWS, COLUMNS
-#  SCREEN_WIDTH, SCREEN_HEIGHT, SURF_WIDTH, SURF_HEIGHT, first_elem_x
-from variables import shapes, shapes_colors, change_shape, next_shape, \
+from variables import shapes, shapes_colors, change_shape, next_shape, change_controls,\
     first_elem_x, first_elem_y
-# elem_size, powers
 from variables import clean_all, minus_line, plus_line
 from classes import Piece
-# Grid, Power
 import random
 
 
@@ -70,6 +67,9 @@ def clean_rows(game):
             for c in range(COLUMNS):
                 game.grid.game_grid[0][c] = 0
 
+    if lines_cleaned != 0:
+        lines_sound = pygame.mixer.Sound('sounds/line.wav')
+        lines_sound.play()
     if lines_cleaned == 1:
         game.points += 40 * game.level
     elif lines_cleaned == 2:
@@ -81,33 +81,40 @@ def clean_rows(game):
 
 
 def run_power(game):
+    power_sound = pygame.mixer.Sound('sounds/power.wav')
+    power_sound.play()
     game.points += 200
-    if game.power.type == clean_all:
+    if game.power.type == change_controls:
+        game.changed_controls = True
+
+    elif game.power.type == clean_all:
         for i in range(ROWS):
             for j in range(COLUMNS):
                 game.grid.game_grid[i][j] = 0
+
     elif game.power.type == next_shape:
         game.curr_piece = game.next_piece
         shape_at_start(game.curr_piece)
         game.next_piece = Piece(3, 0, random.choice(shapes))
         game.curr_piece.draw_piece(game.screen)
+
     elif game.power.type == change_shape:
         game.curr_piece = \
             Piece(game.curr_piece.x, game.curr_piece.y, random.choice(shapes))
         game.curr_piece.draw_piece(game.screen)
+
     elif game.power.type == minus_line:
         for r in range(19, -1, -1):
             for c in range(COLUMNS):
                 game.grid.game_grid[r][c] = game.grid.game_grid[r - 1][c]
-
         for c in range(COLUMNS):
             game.grid.game_grid[0][c] = 0
+
     elif game.power.type == plus_line:
         for c in range(COLUMNS):
             if game.grid.game_grid[0][c] != 0:
                 game.running = False
                 return
-
         empty_space = random.randint(0, COLUMNS - 1)
         color = random.choice(shapes_colors)
         for r in range(ROWS - 1):
@@ -137,10 +144,8 @@ def gamer_lost(game):
             game.running = False
             return True
 
-        piece_pos = [[(j + game.curr_piece.x, i + game.curr_piece.y)
-                      for j in range(0, 4)
-                      if game.curr_piece.shape
-                      [game.curr_piece.rotation][i][j] != 0]
+        piece_pos = [[(j + game.curr_piece.x, i + game.curr_piece.y) for j in range(0, 4)
+                      if game.curr_piece.shape[game.curr_piece.rotation][i][j] != 0]
                      for i in range(0, 4)]
         piece_pos = [j for el in piece_pos for j in el]
         for p in piece_pos:
