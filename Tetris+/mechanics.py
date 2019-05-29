@@ -121,7 +121,7 @@ def run_power(game):
                 game.grid.game_grid[19][c] = 0
 
 
-def check_if_power(piece, power):
+def check_if_power_hit(piece, power):
     clear_shape = piece.shape_without_whitespaces()
 
     for pos in clear_shape:

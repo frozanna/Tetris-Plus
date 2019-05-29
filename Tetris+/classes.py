@@ -41,7 +41,7 @@ class Grid:
         self.game_grid = [[0 for _ in range(COLUMNS)] for _ in range(ROWS)]
 
     def draw_grid(self, screen):
-        frame = pygame.image.load('images/frame.png')
+        frame = pygame.image.load('images/frame.jpg')
         screen.blit(frame, (first_elem_x - 10, first_elem_y - 10))
         for i in range(ROWS):
             for j in range(COLUMNS):
@@ -49,6 +49,19 @@ class Grid:
                     screen.blit(self.game_grid[i][j],
                                 (first_elem_x + j * elem_size,
                                  first_elem_y + i * elem_size))
+
+
+def find_place_for_power(grid, piece):
+    empty_positions = \
+        [[(j, i) for j in range(COLUMNS) if grid[i][j] == 0 and i > 2]
+         for i in range(ROWS)]
+    empty_positions = [j for sub in empty_positions for j in sub]
+    position = random.choice(empty_positions)
+
+    while piece.x <= position[0] <= piece.y or \
+            piece.y <= position[1] <= piece.y + 3:
+        position = random.choice(empty_positions)
+    return position
 
 
 class Power:
@@ -66,14 +79,3 @@ class Power:
                      first_elem_y + self.y * elem_size, elem_size, elem_size))
 
 
-def find_place_for_power(grid, piece):
-    empty_positions = \
-        [[(j, i) for j in range(COLUMNS) if grid[i][j] == 0 and i > 2]
-         for i in range(ROWS)]
-    empty_positions = [j for sub in empty_positions for j in sub]
-    position = random.choice(empty_positions)
-
-    while piece.x <= position[0] <= piece.y or \
-            piece.y <= position[1] <= piece.y + 3:
-        position = random.choice(empty_positions)
-    return position

@@ -8,16 +8,15 @@ from variables import COLUMNS, SCREEN_WIDTH, SCREEN_HEIGHT,  first_elem_x,\
 # clean_all, minus_line, plus_line, powers
 from classes import Grid, Piece, Power
 from mechanics import valid_space, shape_at_start, correct_rotation,\
-    clean_rows, run_power, check_if_power, gamer_lost, draw_pause
+    clean_rows, run_power, check_if_power_hit, gamer_lost, draw_pause
 
 
 class Game:
     def __init__(self):
         pygame.init()
-        self.screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT), FULLSCREEN)
+        self.screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT),
+                                              FULLSCREEN)
         self.clock = pygame.time.Clock()
-
-        self.paused = 0
 
         self.grid = Grid()
         self.curr_piece = None
@@ -25,14 +24,16 @@ class Game:
         self.power = None
 
         self.running = True
+        self.paused = False
         self.level = 1
         self.lines = 0
         self.points = 0
 
     def draw_game(self):
         self.screen.fill([0, 0, 0])
-        title_img = pygame.image.load('images/title.png')
-        self.screen.blit(title_img, (SCREEN_WIDTH / 2 - 190, first_elem_y - 60))
+        title_img = pygame.image.load('images/title.jpg')
+        self.screen.blit(title_img, (SCREEN_WIDTH / 2 - 190,
+                                     first_elem_y - 60))
         self.grid.draw_grid(self.screen)
         font = pygame.font.Font('Pixeled.ttf', 14)
         levels = font.render(str(self.level), 1, (255, 255, 255))
@@ -59,6 +60,10 @@ class Game:
         fall_speed_game = 0
         fall_time_usr = 0
 
+        pygame.mixer.music.load('sounds/Tetris.mp3')
+        pygame.mixer.music.play(-1)
+        pygame.mixer.music.set_volume(0.5)
+
         while self.running:
             if self.paused:
                 draw_pause(self.screen)
@@ -70,36 +75,32 @@ class Game:
                         sys.exit(0)
                     elif event.type == pygame.KEYDOWN and \
                             event.key == pygame.K_p:
-                        self.paused = 0
+                        self.paused = False
                 continue
 
             self.draw_game()
-            if self.running:
-                self.curr_piece.draw_piece(self.screen)
+            self.curr_piece.draw_piece(self.screen)
 
             fall_speed_game = 0.75 / (self.level / 2.5)
             fall_time_game += self.clock.get_rawtime()
             fall_time_usr += self.clock.get_rawtime()
             if self.power is None:
                 to_power_time += self.clock.get_rawtime()
-            else:
-                power_last_time += self.clock.get_rawtime()
-            self.clock.tick()
-
-            if self.power is None:
                 if to_power_time >= 17500:
                     to_power_time = 0
                     self.power = Power(self.grid.game_grid, self.curr_piece)
             else:
+                power_last_time += self.clock.get_rawtime()
                 if power_last_time >= 10000:
                     self.power = None
                     power_last_time = 0
                 else:
                     self.power.draw_power(self.screen)
-                    if check_if_power(self.curr_piece, self.power):
+                    if check_if_power_hit(self.curr_piece, self.power):
                         run_power(self)
                         self.power = None
                         continue
+            self.clock.tick()
 
             if fall_time_game / 1000 >= fall_speed_game:
                 fall_time_game = 0
@@ -109,14 +110,9 @@ class Game:
                 continue
 
             for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    sys.exit(0)
-                elif event.type == pygame.KEYDOWN and \
-                        event.key == pygame.K_ESCAPE:
-                    sys.exit(0)
-                elif event.type == pygame.KEYDOWN and \
+                if event.type == pygame.KEYDOWN and \
                         event.key == pygame.K_p:
-                    self.paused = 1
+                    self.paused = True
                 elif event.type == pygame.KEYDOWN and event.key == pygame.K_UP:
                     self.curr_piece.rotation = (self.curr_piece.rotation + 1)\
                                                % len(self.curr_piece.shape)
@@ -150,7 +146,8 @@ class Game:
             self.level = self.lines // 10 + 1
             pygame.display.update()
 
-        game_over_img = pygame.image.load('images/game_over.png')
+        pygame.mixer.music.stop()
+        game_over_img = pygame.image.load('images/game_over.jpg')
         self.screen.blit(game_over_img,
                          (first_elem_x + 25, first_elem_y + 150))
         pygame.time.delay(200)
@@ -162,7 +159,7 @@ class Game:
         self.next_piece = Piece(3, 0, random.choice(shapes))
 
         self.draw_game()
-        press_start_img = pygame.image.load('images/press_start.png')
+        press_start_img = pygame.image.load('images/press_start.jpg')
         self.screen.blit(press_start_img,
                          (first_elem_x + COLUMNS * elem_size + 15,
                           first_elem_y + 2 * elem_size))
@@ -172,7 +169,9 @@ class Game:
         self.curr_piece.draw_piece(self.screen)
         pygame.display.update()
 
-        while self.running:
+        started = False
+
+        while True:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     sys.exit(0)
@@ -180,5 +179,6 @@ class Game:
                         event.key == pygame.K_ESCAPE:
                     sys.exit(0)
                 elif event.type == pygame.KEYDOWN and \
-                        event.key == pygame.K_SPACE:
+                        event.key == pygame.K_SPACE and not started:
                     self.run()
+                    started = True
