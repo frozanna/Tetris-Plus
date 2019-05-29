@@ -1,7 +1,7 @@
 import pygame
 from variables import ROWS, COLUMNS
-from variables import shapes, shapes_colors, change_shape, next_shape, change_controls,\
-    first_elem_x, first_elem_y
+from variables import shapes, shapes_colors, change_shape, next_shape, change_controls, \
+    clean_column, add_lines, first_elem_x, first_elem_y
 from variables import clean_all, minus_line, plus_line
 from classes import Piece
 import random
@@ -126,6 +126,13 @@ def run_power(game):
                 game.grid.game_grid[19][c] = color
             else:
                 game.grid.game_grid[19][c] = 0
+
+    elif game.power.type == clean_column:
+        for i in range(ROWS):
+            game.grid.game_grid[i][game.power.x] = 0
+
+    elif game.power.type == add_lines:
+        game.lines += 5
 
 
 def check_if_power_hit(piece, power):

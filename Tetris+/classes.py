@@ -62,10 +62,9 @@ def find_place_for_power(grid, piece):
 
     return position
 
-
 class Power:
     def __init__(self, grid, piece):
-        self.type = choice(powers, p=[0.25, 0.3, 0.02, 0.2, 0.15, 0.08])
+        self.type = choice(powers, p=[0.2, 0.2, 0.02, 0.15, 0.15, 0.08, 0.15, 0.05])
         # self.type = clean_all
 
         position = find_place_for_power(grid, piece)

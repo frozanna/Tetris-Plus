@@ -168,7 +168,6 @@ class Game:
                          (first_elem_x + 25, first_elem_y + 150))
         pygame.time.delay(200)
         pygame.display.update()
-        pygame.time.delay(5000)
 
     def start_game(self):
         self.curr_piece = Piece(3, 0, random.choice(shapes))
