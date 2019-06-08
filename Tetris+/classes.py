@@ -1,8 +1,6 @@
 import pygame
 from variables import ROWS, COLUMNS, first_elem_x,\
     first_elem_y, elem_size, shapes, shapes_colors, powers
-# SCREEN_WIDTH, SCREEN_HEIGHT, SURF_WIDTH, SURF_HEIGHT, change_shape,
-# next_shape, clean_all, minus_line, plus_line,
 import random
 from numpy.random import choice
 
@@ -62,10 +60,10 @@ def find_place_for_power(grid, piece):
 
     return position
 
+
 class Power:
     def __init__(self, grid, piece):
         self.type = choice(powers, p=[0.2, 0.2, 0.02, 0.15, 0.15, 0.08, 0.15, 0.05])
-        # self.type = clean_all
 
         position = find_place_for_power(grid, piece)
         self.x = position[0]

@@ -2,10 +2,8 @@ import pygame
 from pygame.locals import FULLSCREEN
 import sys
 import random
-from variables import COLUMNS, SCREEN_WIDTH, SCREEN_HEIGHT,  first_elem_x,\
+from variables import SCREEN_WIDTH, SCREEN_HEIGHT,  first_elem_x,\
     first_elem_y, elem_size, shapes
-# ROWS, SURF_WIDTH, SURF_HEIGHT, shapes_colors, change_shape, next_shape,\
-# clean_all, minus_line, plus_line, powers
 from classes import Grid, Piece, Power
 from mechanics import valid_space, shape_at_start, correct_rotation,\
     clean_rows, run_power, check_if_power_hit, gamer_lost, draw_pause
@@ -13,7 +11,6 @@ from mechanics import valid_space, shape_at_start, correct_rotation,\
 
 class Game:
     def __init__(self):
-        pygame.init()
         self.screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT),
                                               FULLSCREEN)
         self.clock = pygame.time.Clock()
@@ -80,7 +77,15 @@ class Game:
                     self.curr_piece.x += 1
                 self.curr_piece.draw_piece(self.screen)
 
-    def run(self):
+    def run_game(self, music_on):
+        self.curr_piece = Piece(3, 0, random.choice(shapes))
+        self.next_piece = Piece(3, 0, random.choice(shapes))
+
+        shape_at_start(self.curr_piece)
+
+        self.curr_piece.draw_piece(self.screen)
+        pygame.display.update()
+
         to_power_time = 0
         power_last_time = 0
         fall_time_game = 0
@@ -88,8 +93,9 @@ class Game:
         fall_time_usr = 0
         changed_controls_time = 0
 
-        pygame.mixer.music.load('sounds/Tetris.mp3')
-        pygame.mixer.music.play(-1)
+        if music_on:
+            pygame.mixer.music.load('sounds/Tetris.mp3')
+            pygame.mixer.music.play(-1)
         pygame.mixer.music.set_volume(0.5)
 
         while self.running:
@@ -160,7 +166,6 @@ class Game:
             self.level = self.lines // 10 + 1
             pygame.display.update()
 
-        pygame.mixer.music.stop()
         power_sound = pygame.mixer.Sound('sounds/game_over.wav')
         power_sound.play()
         game_over_img = pygame.image.load('images/game_over.png')
@@ -168,32 +173,3 @@ class Game:
                          (first_elem_x + 25, first_elem_y + 150))
         pygame.time.delay(200)
         pygame.display.update()
-
-    def start_game(self):
-        self.curr_piece = Piece(3, 0, random.choice(shapes))
-        self.next_piece = Piece(3, 0, random.choice(shapes))
-
-        self.draw_game()
-        press_start_img = pygame.image.load('images/press_start.png')
-        self.screen.blit(press_start_img,
-                         (first_elem_x + COLUMNS * elem_size + 15,
-                          first_elem_y + 2 * elem_size))
-
-        shape_at_start(self.curr_piece)
-
-        self.curr_piece.draw_piece(self.screen)
-        pygame.display.update()
-
-        started = False
-
-        while True:
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    sys.exit(0)
-                elif event.type == pygame.KEYDOWN and \
-                        event.key == pygame.K_ESCAPE:
-                    sys.exit(0)
-                elif event.type == pygame.KEYDOWN and \
-                        event.key == pygame.K_SPACE and not started:
-                    self.run()
-                    started = True

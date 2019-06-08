@@ -126,4 +126,5 @@ change_controls = pygame.image.load('images/p_change_controls.png')
 clean_column = pygame.image.load('images/p_clean_column.png')
 add_lines = pygame.image.load('images/p_add_lines.png')
 
-powers = [change_shape, next_shape, clean_all, minus_line, plus_line, change_controls, clean_column, add_lines]
+powers = [change_shape, next_shape, clean_all, minus_line,
+          plus_line, change_controls, clean_column, add_lines]
